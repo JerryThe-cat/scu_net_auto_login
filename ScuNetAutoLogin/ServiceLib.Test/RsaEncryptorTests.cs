@@ -1,12 +1,11 @@
-using AwesomeAssertions;
 using ServiceLib.Helper;
 
 namespace ServiceLib.Test;
 
 public class RsaEncryptorTests
 {
-    [Fact]
-    public void TestEncrypt()
+    [Test]
+    public async Task TestEncrypt()
     {
         var expectedResult = "0f8c069affb97231" +
                              "446dce90164fd7d5" +
@@ -29,6 +28,6 @@ public class RsaEncryptorTests
         var mac = "eef900330a8987f0957c14c756513384";
         var encrypted = LegacyCampusRsaEncryptor.EncryptPassword(password, mac);
 
-        encrypted.Should().Be(expectedResult);
+        await encrypted.Should().BeEqualTo(expectedResult);
     }
 }
