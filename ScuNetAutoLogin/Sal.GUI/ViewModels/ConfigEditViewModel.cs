@@ -33,7 +33,8 @@ public partial class ConfigEditViewModel : ViewModelBase
         Account = Config.UserList.First();
 
         _lastSavedSnapshot = CreateSnapshot(Config.ToConfigItem());
-        _monitorTask = MonitorConfigChangesAsync(_monitorCts.Token);
+        //_monitorTask = MonitorConfigChangesAsync(_monitorCts.Token);
+        _monitorTask = Task.Run(() => MonitorConfigChangesAsync(_monitorCts.Token));
     }
 
     public static IReadOnlyList<ServiceOption> ServiceOptions { get; } = ServiceOption.CreateDefaultList();
@@ -85,9 +86,17 @@ public partial class ConfigEditViewModel : ViewModelBase
     private async Task MonitorConfigChangesAsync(CancellationToken token)
     {
         using var timer = new PeriodicTimer(SaveCheckInterval);
-        while (await timer.WaitForNextTickAsync(token))
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                await SaveIfChangedAsync();
+            }
+        }
+        catch (OperationCanceledException)
         {
             await SaveIfChangedAsync();
+            // Ignore
         }
     }
 
